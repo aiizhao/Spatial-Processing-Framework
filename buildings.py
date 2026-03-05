@@ -294,18 +294,3 @@ class StreetParking:
             shortest_route, min_dist = self._street_edge_walking_distance(lat, lon, closest_parking, float("inf"))
 
         return closest_parking, shortest_route, min_dist
-
-
-if __name__ == "__main__":
-    from osm import OpenStreetMapDataLoader
-    data = OpenStreetMapDataLoader("MIT", "Cambridge, MA, USA", "data")
-    data.load_data()
-    buildings = BuildingsData(data)
-    building_features = buildings.sdz_building_features[980722694]
-    street_parking = StreetParking(data)
-    closest_parking, shortest_route, min_dist = street_parking.get_closest_parking(building_features, 100)
-    print(closest_parking)
-    buildings.building_closest_intersection()
-    buildings.building_closest_edge()
-    buildings.building_nearby_facilities([50, 100], 100)
-    buildings.building_dataframe().to_csv("test.csv")

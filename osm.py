@@ -135,9 +135,3 @@ class OpenStreetMapDataLoader:
             if filename.endswith(".pkl") and filename[:-4] in self.__dict__:
                 with open(os.path.join(self.data_path, filename), "rb") as f:
                     self.__dict__[filename[:-4]] = pickle.load(f)
-
-
-if __name__ == "__main__":
-    data = OpenStreetMapDataLoader("MIT", "Cambridge, MA, USA", "data")
-    # data.save_data()
-    # data.load_data()

@@ -16,15 +16,14 @@ class TimeInterval:
 
     interval_regex = re.compile(r"^(\d{2}):(\d{2})-(\d{2}):(\d{2})$")
 
-    def __init__(
-        self, start_hour: int, start_minute: int, end_hour: int, end_minute: int
-    ):
+    def __init__(self, start_hour: int, start_minute: int, end_hour: int, end_minute: int):
         """
         Params:
-            start_hour: Integer in [0, 23].
-            start_minute: Integer in [0, 59].
-            end_hour: Integer in [0, 23]. Must be greater than or equal to `start_hour`.
-            end_minute: Integer in [0, 59]. Must be greater than or equal to `start_minute` if `start_hour` = `end_hour`.
+            - start_hour: Integer in [0, 23].
+            - start_minute: Integer in [0, 59].
+            - end_hour: Integer in [0, 23]. Must be greater than or equal to `start_hour`.
+            - end_minute: Integer in [0, 59]. Must be greater than or equal to `start_minute` if `start_hour` = `end_hour`.
+
         Raises:
             ValueError if any params are out-of-bounds or the interval end is before the interval start.
         """
@@ -38,6 +37,7 @@ class TimeInterval:
         """
         Params:
             otherInterval: Any time interval.
+
         Returns:
             The intersection with `otherInterval`, or an empty interval 00:00-00:00 if the intervals do not intersect.
         """
@@ -53,6 +53,7 @@ class TimeInterval:
         """
         Params:
             otherInterval: Any time interval.
+
         Returns:
             The union with `otherInterval`, or an empty interval 00:00-00:00 if the intervals do not intersect.
         """
@@ -68,6 +69,7 @@ class TimeInterval:
         """
         Params:
             otherIntervals: Nonempty list of time intervals.
+
         Returns:
             The IoU with `otherInterval`. Ratio in [0, 1] rounded to two decimal places.
         """
@@ -107,6 +109,7 @@ class TimeInterval:
         """
         Params:
             otherInterval: Any time interval.
+
         Returns:
             True if `otherInterval` is fully contained within the interval, and False otherwise.
         """
@@ -126,10 +129,12 @@ class TimeInterval:
         """
         Params:
             interval_str: Either one of ["24/7", "closed", "unknown"] or a string formatted as "HH:MM-HH:MM" representing an interval within 00:00-23:59.
+
         Returns:
             The time interval represented by `interval_str`.
             If `interval_str` is "24/7", returns the interval 00:00-23:59.
             If `interval_str` is "unknown" or "closed", returns the empty interval 00:00-00:00.
+
         Raises:
             ValueError if `interval_str` does not match any of the accepted formats.
         """
@@ -150,6 +155,12 @@ class TimeInterval:
 
 class BuildingHours:
     def __init__(self, sdz_name, google_api_key, gemini_api_key):
+        """
+        Params:
+            - sdz_name: Name of a campus or institution.
+            - google_api_key: Google Cloud API Key.
+            - gemini_api_key: Google Gemini API Key.
+        """
         self.sdz_name = sdz_name
         self.google_api_key = google_api_key
         self.gemini_api_key = gemini_api_key
@@ -279,7 +290,3 @@ class BuildingHours:
             "opening_hours": opening_hours_interval_list,
             "delivery_window": delivery_window_interval_list,
         }
-
-
-if __name__ == "__main__":
-    pass
