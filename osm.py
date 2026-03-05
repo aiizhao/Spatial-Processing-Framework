@@ -1,62 +1,122 @@
-class DownloadOpenStreetMapData:
-    def get_buildings(sdz, place):
-        SDZ_GDF = ox.geocode_to_gdf(f"{sdz}, {place}")
-        SDZ_BOUNDARY = SDZ_GDF.loc[0, "geometry"]
+import os
+import pickle
+import osmnx as ox
+import networkx as nx
+import geopandas as gpd
+from shapely.strtree import STRtree
+from utils import make_feature_tree
 
-        BUILDINGS = ox.features_from_place(place, tags={"building": True})
-        BUILDINGS = BUILDINGS.reset_index(drop=False)
-        BUILDINGS_TREE = STRtree(BUILDINGS.geometry)
 
-        SDZ_BUILDINGS = ox.features_from_place(f"{sdz}, {place}", tags={"building": True})
-        SDZ_BUILDINGS = SDZ_BUILDINGS.reset_index(drop=False)
+ox.settings.useful_tags_way = [
+  "name",
+  "highway",
+  "maxspeed",
+  "parking:both",
+  "parking:both:fee",
+  "parking:both:access",
+  "parking:both:maxstay"
+]
 
-    def get_street_network_walking(place):
-        G_WALKING = ox.graph_from_place(place, network_type="walk")
-        G_WALKING = ox.distance.add_edge_lengths(G_WALKING)
 
-    def get_street_network_driving(place):
-        G_DRIVING = ox.graph_from_place(place, network_type="drive")
-        EDGE_CENTRALITIES = nx.edge_betweenness_centrality(G_DRIVING, weight="length")
-        nx.set_edge_attributes(G_DRIVING, EDGE_CENTRALITIES, "importance")
+class OpenStreetMapDataLoader:
+    def __init__(self, sdz, place, data_path):
+        self.sdz = sdz
+        self.place = place
+        self.data_path = data_path
 
-    def get_street_network_tree():
-        WALKING_STREET_NODES, WALKING_STREET_EDGES = ox.graph_to_gdfs(G_WALKING)
-        STREET_NODES, STREET_EDGES = ox.graph_to_gdfs(G_DRIVING)
 
-        STREET_EDGES = STREET_EDGES.reset_index(drop=False)
-        STREET_EDGES_TREE = STRtree(STREET_EDGES.geometry)
+    def _get_buildings(self):
+        sdz_gdf = ox.geocode_to_gdf(f"{self.sdz}, {self.place}")
+        self.sdz_boundary = sdz_gdf.loc[0, "geometry"]
 
-        STREET_INTERSECTIONS = STREET_NODES[STREET_NODES["street_count"] > 1]
-        STREET_INTERSECTIONS = STREET_INTERSECTIONS.reset_index(drop=False)
-        STREET_INTERSECTIONS_TREE = STRtree(STREET_INTERSECTIONS.geometry)
+        sdz_buildings = ox.features_from_place(f"{self.sdz}, {self.place}", tags={"building": True})
+        self.sdz_buildings = sdz_buildings.reset_index(drop=False)
 
-    def get_pois(place):
+        print("Building Data Retrieved")
+
+
+    def _get_street_network(self):
+        g_walking = ox.graph_from_place(self.place, network_type="walk")
+        self.g_walking = ox.distance.add_edge_lengths(g_walking)
+
+        self.g_driving = ox.graph_from_place(self.place, network_type="drive")
+        self.edge_centralities = nx.edge_betweenness_centrality(self.g_driving, weight="length")
+        nx.set_edge_attributes(self.g_driving, self.edge_centralities, "importance")
+
+        self.walking_street_nodes, self.walking_street_edges = ox.graph_to_gdfs(self.g_walking)
+        street_nodes, street_edges = ox.graph_to_gdfs(self.g_driving)
+
+        self.street_edges = street_edges.reset_index(drop=False)
+        self.street_edges_tree = STRtree(self.street_edges.geometry)
+
+        street_intersections = street_nodes[street_nodes["street_count"] > 1]
+        self.street_intersections = street_intersections.reset_index(drop=False)
+        self.street_intersections_tree = STRtree(self.street_intersections.geometry)
+
+        print("Street Network Data Retrieved")
+
+
+    def _get_pois(self):
         try:
-            POIS = ox.features_from_place(place, tags={
+            pois = ox.features_from_place(self.place, tags={
                 "leisure": "park",
                 "tourism": "museum",
                 "amenity": ["university", "college"]
             })
         except:
-            POIS = gpd.GeoDataFrame(geometry=[])
-            POIS_TREE = make_feature_tree(POIS)
+            pois = gpd.GeoDataFrame(geometry=[])
+        self.pois_tree = make_feature_tree(pois)
 
-    def get_loading_docks(place):
+        print("Points of Interest Data Retrieved")
+
+
+    def _get_loading_docks(self):
         try:
-            SDZ_LOADING_DOCKS = ox.features_from_place(SDZ, tags={"amenity": "loading_dock"})
+            sdz_loading_docks = ox.features_from_place(self.sdz, tags={"amenity": "loading_dock"})
         except:
-            SDZ_LOADING_DOCKS = gpd.GeoDataFrame(geometry=[])
-            SDZ_LOADING_DOCKS_TREE = make_feature_tree(SDZ_LOADING_DOCKS)
+            sdz_loading_docks = gpd.GeoDataFrame(geometry=[])
+        self.sdz_loading_docks_tree = make_feature_tree(sdz_loading_docks)
 
-    def get_parking_amenities(place):
+        print("Loading Dock Data Retrieved")
+
+
+    def _get_parking_amenities(self):
         try:
-            SDZ_PARKING_AMENITIES = ox.features_from_place(SDZ, tags={
+            sdz_parking_amenities = ox.features_from_place(self.sdz, tags={
                 "amenity": "parking",
                 "fee": True,
                 "access": True,
                 "maxstay": True,
             })
         except:
-            SDZ_PARKING_AMENITIES = gpd.GeoDataFrame(geometry=[])
-            SDZ_PARKING_AMENITIES_TREE = make_feature_tree(SDZ_PARKING_AMENITIES)
-            SDZ_PARKING_EDGES = STREET_EDGES[(STREET_EDGES["parking:both"].notna()) | (STREET_EDGES["highway"] == "residential")]
+            sdz_parking_amenities = gpd.GeoDataFrame(geometry=[])
+        self.sdz_parking_amenities_tree = make_feature_tree(sdz_parking_amenities)
+        self.sdz_parking_edges = self.street_edges[(self.street_edges["parking:both"].notna()) | (self.street_edges["highway"] == "residential")]
+
+        print("Parking Amenity Data Retrieved")
+
+
+    def save_data(self):
+        self._get_buildings()
+        self._get_street_network()
+        self._get_pois()
+        self._get_loading_docks()
+        self._get_parking_amenities()
+
+        for key, object in self.__dict__.items():
+            if key not in set(["sdz", "place", "data_path"]):
+                with open(f"{self.data_path}/{key}.pkl", "wb") as file:
+                    pickle.dump(object, file)
+
+    
+    def load_data(self):
+        for filename in os.listdir(self.data_path):
+            if filename.endswith(".pkl"):
+                with open(os.path.join(self.data_path, filename), "rb") as f:
+                    self.__dict__[filename[:-4]] = pickle.load(f)
+
+
+if __name__ == "__main__":
+    data = OpenStreetMapDataLoader("MIT", "Cambridge, MA, USA", "data")
+    # data.save_data()
+    # data.load_data()
