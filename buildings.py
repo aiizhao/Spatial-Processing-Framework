@@ -21,7 +21,7 @@ class BuildingFeatures:
         self.street = None
         self.city = None
         self.state = None
-        self.country = None
+        self.postcode = None
         self.intersection_osmid = None
         self.intersection_deg = None
         self.dist_to_intersection = None
@@ -38,7 +38,7 @@ class BuildingsData:
     def __init__(self, osm_data):
         """
         Params: 
-            osm_data: OpenStreetMapDataLoader wiht non-None fields.
+            osm_data: OpenStreetMapDataLoader with nonempty fields.
         """
         self.osm_data = osm_data
         self.sdz_building_features = dict()
@@ -57,7 +57,7 @@ class BuildingsData:
             self.sdz_building_features[osmid].street = row.get("addr:street", float("nan"))
             self.sdz_building_features[osmid].city = row.get("addr:city", float("nan"))
             self.sdz_building_features[osmid].state = row.get("addr:state", float("nan"))
-            self.sdz_building_features[osmid].country = row.get("addr:country", float("nan"))
+            self.sdz_building_features[osmid].postcode = row.get("addr:postcode", float("nan"))
 
 
     def _building_dimensions(self, building):
@@ -123,11 +123,10 @@ class BuildingsData:
             - dist_to_edge: Distance to closest street edge in meters.
         """
         for _, building_features in self.sdz_building_features.items():
-            centroid = building_features.geometry.centroid
-            centroid_proj = transform(transformer_to_meters.transform, centroid)
+            geometry_proj = transform(transformer_to_meters.transform, building_features.geometry)
 
             # query nearby edges using spatial index
-            nearby_indices = self.osm_data.street_edges_tree.query(centroid.buffer(0.01))  # ~1 km buffer in degrees
+            nearby_indices = self.osm_data.street_edges_tree.query(building_features.geometry.buffer(0.01))  # ~1 km buffer in degrees
             if not len(nearby_indices):
                 nearby_indices = range(len(self.osm_data.street_edges))
 
@@ -139,7 +138,7 @@ class BuildingsData:
                 edge_geom = self.osm_data.street_edges.geometry.iloc[idx]
                 edge_proj = transform(transformer_to_meters.transform, edge_geom)
 
-                dist = centroid_proj.distance(edge_proj)
+                dist = geometry_proj.distance(edge_proj)
                 if dist < min_dist:
                     min_dist = dist
                     edge_idx = idx
@@ -220,8 +219,8 @@ class BuildingsData:
 class StreetParking:
     def __init__(self, osm_data):
         """
-        Params
-            osm_data: OpenStreetMapDataLoader wiht non-None fields.
+        Params:
+            osm_data: OpenStreetMapDataLoader wiht nonempty fields.
         """
         self.osm_data = osm_data
 
@@ -306,7 +305,7 @@ if __name__ == "__main__":
     street_parking = StreetParking(data)
     closest_parking, shortest_route, min_dist = street_parking.get_closest_parking(building_features, 100)
     print(closest_parking)
-    # buildings.building_closest_intersection()s
-    # buildings.building_closest_edge()
-    # buildings.building_nearby_facilities([50, 100], 100)
-    # buildings.building_dataframe().to_csv("test.csv")
+    buildings.building_closest_intersection()
+    buildings.building_closest_edge()
+    buildings.building_nearby_facilities([50, 100], 100)
+    buildings.building_dataframe().to_csv("test.csv")

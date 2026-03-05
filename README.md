@@ -4,29 +4,22 @@ This package analyzes the buildings and surrounding area of a given university o
 
 ## Getting Started
 
-### Setup
-
-To run, you need to install the following Python packages:
+To run, first install the following Python packages:
 ```
-!pip install numpy pandas osmnx networkx shapely pyproj geopy geopandas scipy tqdm scikit-learn
+!pip install numpy pandas osmnx networkx shapely pyproj geopy geopandas scipy tqdm
 ```
-
-### API Keys
-
-*   For the **Building Hours** section, add a key titled `GEMINI_API_KEY` in the .env and enter a usable API key for Google Gemini.
-*   Also for the **Building Hours** section, add a key titled `GOOGLE_API_KEY` in the .env and enter a usable API key for Google Cloud.
 
 ## Section Overview
 
-*   **OSM Data Loader**: Fetches and preprocesses OpenStreetMap data, including buildings, roads, and points of interest, for the specified location and SDZ.
-*   **Building Features**: Calculates various features for each building within the SDZ, such as height, area, proximity to intersections and street edges, and nearby points of interest.
-*   **Street Parking**: Identifies the closest street parking options to a given building within the SDZ and visualizes the shortest walking route.
-*   **Building Hours**: Uses LLM and Google Places API to extract building opening hours and ideal delivery windows for specific delivery locations within the SDZ.
+*   **OpenStreetMapDataLoader**: Fetches and preprocesses OpenStreetMap data, including buildings, roads, and points of interest, for the specified location and SDZ.
+*   **BuildingFeatures**: Calculates various features for each building within the SDZ, such as height, area, proximity to intersections and street edges, and nearby points of interest.
+*   **StreetParking**: Identifies the closest street parking options to a given building within the SDZ.
+*   **BuildingHours**: Uses LLM and Google Places API to extract building opening hours and ideal delivery windows for specific delivery locations within the SDZ.
 *   **Utility Functions**: Defines functions used for geographical calculations and data manipulation.
 
 ### OSM Data Loader
 
-The `OpenStreetMapDataLoader` class fetches and caches the following datasets as `.pkl` files to `data_path`:
+The `OpenStreetMapDataLoader` class fetches and caches the following datasets as `.pkl` files to the specified `data_path`:
 
 | Attribute | Description |
 |---|---|
@@ -46,7 +39,7 @@ The `OpenStreetMapDataLoader` class fetches and caches the following datasets as
 | `sdz_parking_amenities_tree` | STRtree spatial index over parking amenities within the SDZ |
 | `sdz_parking_edges` | Street edges GeoDataFrame with on-street parking tags or residential highway type |
 
-Call `save_data()` to fetch from OSM and write all `.pkl` files, or `load_data()` to restore a previously saved session.
+Call `save_data()` to fetch from OSM and write all `.pkl` files, or `load_data()` to restore previously saved data.
 
 ### Building Features
 
@@ -66,7 +59,7 @@ The `BuildingsData` class computes the following features for each building, sto
 | `state` | State via `addr:state` |
 | `country` | Country via `addr:country` |
 
-**Nearest Intersection** via `building_closest_intersection()`:
+**Nearest Intersection** `building_closest_intersection()`:
 
 | Field | Description |
 |---|---|
@@ -74,7 +67,7 @@ The `BuildingsData` class computes the following features for each building, sto
 | `intersection_deg` | Degree of the nearest intersection |
 | `dist_to_intersection` | Distance to the nearest intersection in meters |
 
-**Nearest Street Edge** via `building_closest_edge()`:
+**Nearest Street Edge** `building_closest_edge()`:
 
 | Field | Description |
 |---|---|
@@ -83,7 +76,7 @@ The `BuildingsData` class computes the following features for each building, sto
 | `edge_importance` | Betweenness centrality score of that edge |
 | `dist_to_edge` | Distance to the nearest street edge in meters |
 
-**Nearby Facilities** via `building_nearby_facilities()`:
+**Nearby Facilities** `building_nearby_facilities()`:
 
 | Field | Description |
 |---|---|
