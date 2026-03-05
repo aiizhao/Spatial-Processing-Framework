@@ -8,21 +8,42 @@ from utils import make_feature_tree
 
 
 ox.settings.useful_tags_way = [
-  "name",
-  "highway",
-  "maxspeed",
-  "parking:both",
-  "parking:both:fee",
-  "parking:both:access",
-  "parking:both:maxstay"
+    "name",
+    "highway",
+    "maxspeed",
+    "parking:both",
+    "parking:both:fee",
+    "parking:both:access",
+    "parking:both:maxstay"
 ]
 
 
 class OpenStreetMapDataLoader:
-    def __init__(self, sdz, place, data_path):
+    def __init__(self, sdz: str, place: str, data_path: str):
+        """
+        Params:
+            - sdz: Name of a campus or institution.
+            - place: City, state, country the SDZ is located in.
+            - data_path: Relative filepath location to store data fetched from OSM as .pkl files.
+        """
         self.sdz = sdz
         self.place = place
         self.data_path = data_path
+        self.sdz_boundary = None
+        self.sdz_buildings = None
+        self.g_walking = None
+        self.g_driving = None
+        self.edge_centralities = None
+        self.walking_street_nodes = None
+        self.walking_street_edges = None
+        self.street_edges = None
+        self.street_edges_tree = None
+        self.street_intersections = None
+        self.street_intersections_tree = None
+        self.pois_tree = None
+        self.sdz_loading_docks_tree = None
+        self.sdz_parking_amenities_tree = None
+        self.sdz_parking_edges = None
 
 
     def _get_buildings(self):
@@ -111,7 +132,7 @@ class OpenStreetMapDataLoader:
     
     def load_data(self):
         for filename in os.listdir(self.data_path):
-            if filename.endswith(".pkl"):
+            if filename.endswith(".pkl") and filename[:-4] in self.__dict__:
                 with open(os.path.join(self.data_path, filename), "rb") as f:
                     self.__dict__[filename[:-4]] = pickle.load(f)
 

@@ -13,7 +13,7 @@ class BuildingsData:
 
         for _, row in tqdm(self.osm_data.sdz_buildings.iterrows(), total=len(self.osm_data.sdz_buildings)):
             osmid = row["id"]
-            height, area = self.building_dimensions(osmid)
+            height, area = self._building_dimensions(row)
 
             self.buildings_features[osmid] = {
                 "name": row.get("name", float("nan")),
@@ -26,20 +26,7 @@ class BuildingsData:
                 "country": row.get("addr:country", float("nan"))
             }
 
-    def building_dimensions(self, osmid):
-        """
-        Params
-            - osmid: Element ID in OSM.
-
-        Returns:
-            Tuple with height in meters and area in square meters.
-            Replaces each field with NaN if the information is not available in OSM.
-        """
-        try:
-            building = self.osm_data.sdz_buildings[self.osm_data.sdz_buildings["id"] == osmid].iloc[0]
-        except:
-            return float("nan"), float("nan")
-
+    def _building_dimensions(self, building):
         # check "height" and "building:levels" tags
         try:
             height = float(str(building["height"]).replace("m", ""))
@@ -64,7 +51,7 @@ class BuildingsData:
         """
         Compute the closest street intersection for each address.
 
-        Returns: Adds three fields for each building in `buildings_dict`.
+        Returns: Adds three fields for each building in `buildings_features`.
             - intersection_osmid: OSM ID of closest intersection
             - intersection_deg: Degree of closest intersection
             - dist_to_intersection: Distance to closest intersection in meters
@@ -98,7 +85,7 @@ class BuildingsData:
         """
         Compute the closest street edge for each building.
 
-        Returns: Adds three fields for each building in `buildings_dict`.
+        Adds three fields for each building in `buildings_features`.
             - edge_id: <u>, <v>, <key> tuple of closest street edge.
             - edge_highway_type: Highway type of closest edge.
             - edge_importance: Betweenness centrality of closest edge.
@@ -164,7 +151,7 @@ class BuildingsData:
           - poi_thresholds: List of distance thresholds in meters.
           - parking_threshold: Distance threshold in meters.
 
-        Returns: Adds new fields for each building in `buildings_dict`.
+        Adds new fields for each building in `buildings_features`.
           - nearby_poi_<threshold>: PoI count for each threshold in `poi_thresholds` for each building in `buildings_dict`.
           - loading_dock: Boolean indicating whether a building has a loading dock.
           - parking_amenity: Boolean indicating whether a building has a parking amenity.
