@@ -125,7 +125,7 @@ class OpenStreetMapDataLoader:
         self._get_parking_amenities()
 
         for key, object in self.__dict__.items():
-            if key not in set(["sdz", "place", "data_path"]):
+            if key not in ["sdz", "place", "data_path"]:
                 with open(f"{self.data_path}/{key}.pkl", "wb") as file:
                     pickle.dump(object, file)
 
