@@ -1,6 +1,6 @@
 # Spatial Processing Framework
 
-This package analyzes the buildings and surrounding area of a given "Special Delivery Zone," focusing on university or hospital campuses. It provides insights into campus infrastructure, parking accessibility, and points of interest.
+This package analyzes the buildings and surrounding area of a given "Special Delivery Zone," focusing on university or hospital campuses in the United States. It provides insights into campus infrastructure, parking accessibility, and points of interest.
 
 ## Getting Started
 
@@ -68,7 +68,7 @@ Computed on initialization:
 | `street` | Street address via `addr:street` |
 | `city` | City via `addr:city` |
 | `state` | State via `addr:state` |
-| `country` | Country via `addr:country` |
+| `postcode` | Country via `addr:postcode` |
 
 ### Nearest Intersection
 
@@ -97,7 +97,7 @@ Computed on initialization:
 
 | Field | Description |
 |---|---|
-| `nearby_poi_<threshold>` | Count of parks, museums, and campuses within each `poi_threshold` meters |
+| `nearby_poi` | Count of parks, museums, and campuses within each `poi_threshold` meters |
 | `loading_dock` | `True` i.f.f. a loading dock amenity exists within `parking_threshold` meters |
 | `parking_amenity` | `True` i.f.f. a parking amenity exists within `parking_threshold` meters |
 
