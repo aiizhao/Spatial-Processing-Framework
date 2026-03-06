@@ -1,6 +1,6 @@
 # Spatial Processing Framework
 
-This package analyzes the buildings and surrounding area of a given university or hospital campus. It provides insights into campus infrastructure, accessibility, and points of interest.
+This package analyzes the buildings and surrounding area of a given "Special Delivery Zone," focusing on university or hospital campuses. It provides insights into campus infrastructure, parking accessibility, and points of interest.
 
 ## Getting Started
 
