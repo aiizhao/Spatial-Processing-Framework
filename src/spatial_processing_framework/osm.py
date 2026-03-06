@@ -7,6 +7,9 @@ from shapely.strtree import STRtree
 from utils import make_feature_tree
 
 
+__all__ = ["OpenStreetMapDataLoader"]
+
+
 ox.settings.useful_tags_way = [
     "name",
     "highway",

@@ -107,11 +107,11 @@ Computed on initialization:
 
 The `StreetParking` class identifies the closest street parking option to a given building by walking route distance.
 
-### `get_closest_parking(building_features, parking_threshold)`
+### `get_closest_parking()`
 
 | Param | Description |
 |---|---|
-| `building_features` | A `BuildingFeatures` object for the target building |
+| `building_features` | `BuildingFeatures` object for the target building |
 | `parking_threshold` | Maximum great-circle distance in meters to consider a parking edge as a candidate |
 
 Returns a tuple of three values:
@@ -138,7 +138,7 @@ The `BuildingHours` class retrieves opening hours and delivery windows for speci
 | `google_api_key` | Google Cloud API key for the Places API |
 | `gemini_api_key` | Google Gemini API key |
 
-### `get_building_hours(delivery_location_name, delivery_location_address)`
+### `get_building_hours()`
 
 Fetches opening hours from the Google Places API Text Search and delivery window estimates from Gemini 2.5 Flash-Lite, then merges the results.
 

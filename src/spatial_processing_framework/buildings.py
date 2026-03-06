@@ -11,6 +11,9 @@ from utils import *
 from constants import *
 
 
+__all__ = ["BuildingFeatures", "BuildingsData", "StreetParking"]
+
+
 class BuildingFeatures:
     def __init__(self):
         self.name = None
@@ -220,7 +223,7 @@ class StreetParking:
     def __init__(self, osm_data):
         """
         Params:
-            osm_data: OpenStreetMapDataLoader wiht nonempty fields.
+            osm_data: OpenStreetMapDataLoader with nonempty fields.
         """
         self.osm_data = osm_data
 
@@ -262,8 +265,8 @@ class StreetParking:
     def get_closest_parking(self, building_features, parking_threshold):
         """
         Params:
-            - building_features: #TODO
-            - parking_threshold: #TODO
+            - building_features: BuildingFeatures object for the target building
+            - parking_threshold: Maximum great-circle distance in meters to consider a parking edge as a candidate
 
         Returns: A tuple containing
             - The closest street edge from the centroid of the input geometry by walking route distance; None if no street edges are within the greact circle distance threshold.
